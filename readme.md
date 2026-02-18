@@ -35,4 +35,4 @@ I haven't decided yet. I'm leaning toward MIT and just giving this to the world.
 
 
 ## About AI
-Big topic these days, so I'll be clear: I'm a programmer. I've been writing code for over 40 years now. Right now, I'm teaching myself Go and I am building this minimal assistance &mdash; basically I ask AI questions, sometimes, because that helps me learn Go better. At no point am I letting AI write the code for me.
+Big topic these days, so I'll be clear: I'm a programmer. I've been writing code for over 40 years now. Right now, I'm teaching myself Go and I am building this with minimal assistance &mdash; basically I ask AI questions, sometimes, because that helps me learn Go better. At no point am I letting AI write the code for me.
