@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"log/slog"
-	"sync"
 	"github.com/jamie-belanger/personal-quotes/internal/enums"
 	"github.com/jamie-belanger/personal-quotes/internal/storage"
 )
@@ -14,7 +13,6 @@ easy to inject into any dependency method
 */
 type Application struct {
 	Logger     *slog.Logger
-	Mu	       sync.RWMutex
 
 	// Port the application is listening on
 	Port       *int
@@ -32,8 +30,6 @@ type Application struct {
 */
 func (a *Application) ConnectDatabase() error {
 	a.Logger.Info("Database Connect initialized")
-	a.Mu.Lock()
-	defer a.Mu.Unlock()
 	defer a.Logger.Info("Database Connect complete")
 
 	switch a.Dbtype {
@@ -55,8 +51,6 @@ func (a *Application) ConnectDatabase() error {
 */
 func (a *Application) DisconnectDatabase() error {
 	a.Logger.Info("Database Disconnecting")
-	a.Mu.Lock()
-	defer a.Mu.Unlock()
 	defer a.Logger.Info("Database Disconnect complete")
 
 	if err := a.Database.CloseConnection(); err != nil {

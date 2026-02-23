@@ -3,15 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+
 	"github.com/jamie-belanger/personal-quotes/internal/app"
+	"github.com/jamie-belanger/personal-quotes/internal/models"
 )
 
 type QuoteCreateResponse struct {
-	Id string `json:"id"`
-}
-type QuoteRetrieveResponse struct {
-	QuoteBody string `json:"quote"`
-	QuoteAuthor string `json:"author"`
+	Id int64 `json:"id"`
 }
 
 
@@ -26,10 +24,10 @@ func GetRandomQuote(a *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if _, err := a.Database.GetRandomQuote(); err == nil {
-	 		json.NewEncoder(w).Encode(QuoteRetrieveResponse{ QuoteBody: "", QuoteAuthor: "" })
+		if quote, err := a.Database.GetRandomQuote(); err == nil {
+	 		json.NewEncoder(w).Encode(quote)
 		} else {
-		 	sendJsonErrorMessage(a, w, http.StatusNotFound, err.Error())
+		 	sendJsonErrorMessage(a, w, http.StatusNotFound, err.Error(), err)
 		}
 	}
 }
@@ -51,113 +49,150 @@ func GetQuote(a *app.Application) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 
 		// First ensure the link ID exists in path; otherwise it's a 400 Bad Request
-		quoteId := r.PathValue("id")
-		if "" == quoteId {
-			sendJsonErrorMessage(a, w, http.StatusBadRequest, "ID not provided in URL")
+		id, err := tryParseId(r.PathValue("id"))
+		if nil != err {
+			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Invalid or out of range ID", err)
 			return
 		}
 
-		if _, err := a.Database.GetQuote(quoteId); err == nil {
-			json.NewEncoder(w).Encode(QuoteRetrieveResponse{ QuoteBody: "", QuoteAuthor: "" })
+		if quote, err := a.Database.GetQuote(id); err == nil {
+			json.NewEncoder(w).Encode(quote)
 		} else {
-			sendJsonErrorMessage(a, w, http.StatusNotFound, err.Error())
+			sendJsonErrorMessage(a, w, http.StatusNotFound, err.Error(), err)
 		}
 	}
 }
 
 
 
-// /*
-// 	Creates a shorted link
+/*
+	Saves the given data to the database
+
+	# Parameters (FORM)
+
+	- body (string) = text to save for quote body
+
+	- author (string) = text to save for quote author
+
+	# Returns
 	
-// 	# Parameters (form)
+	QuoteCreateResponse = the newly saved quote Id
+*/
+func CreateQuote(a *app.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 
-// 	- link (string) = the link to shorten and store
+		// Load data
+		body, err := sanitizeHTML(r.FormValue("body"))
+		if nil != err {
+			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Error parsing body text", err)
+			return
+		}
+
+		author, err := sanitizeHTML(r.FormValue("author"))
+		if nil != err {
+			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Error parsing author text", err)
+			return
+		}
+
+		quote := &models.Quote{
+			Id: 0,
+			Body: body,
+			Author: author,
+		}
+
+		if quoteId, err := a.Database.SaveQuote(quote); err == nil {
+			json.NewEncoder(w).Encode(QuoteCreateResponse{ Id: quoteId })
+		} else {
+			sendJsonErrorMessage(a, w, http.StatusNotFound, err.Error(), err)
+		}
+	}
+}
+
+
+
+/*
+	Saves the given data to the database
+
+	# Parameters (URL)
+
+	- id (string) = a quote to retrieve
+
+	# Parameters (FORM)
+
+	- body (string) = text to save for quote body
+
+	- author (string) = text to save for quote author
+
+	# Returns
 	
-// 	# Returns
+	HTML response code and/or error message
+*/
+func UpdateQuote(a *app.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		// First ensure the link ID exists in path; otherwise it's a 400 Bad Request
+		id, err := tryParseId(r.PathValue("id"))
+		if nil != err {
+			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Invalid or out of range ID", err)
+			return
+		}
+
+		// Load data
+		body, err := sanitizeHTML(r.FormValue("body"))
+		if nil != err {
+			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Error parsing body text", err)
+			return
+		}
+
+		author, err := sanitizeHTML(r.FormValue("author"))
+		if nil != err {
+			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Error parsing author text", err)
+			return
+		}
+
+		quote := &models.Quote{
+			Id: id,
+			Body: body,
+			Author: author,
+		}
+
+		if _, err := a.Database.SaveQuote(quote); err == nil {
+			w.WriteHeader(http.StatusNoContent)
+		} else {
+			sendJsonErrorMessage(a, w, http.StatusNotFound, err.Error(), err)
+		}
+	}
+}
+
+
+/*
+	Deletes the given quote from the database
+
+	# Parameters (URL)
+
+	- id (string) = a quote to retrieve
+
+	# Returns
 	
-// 	string = the short slug you can use to retrieve the link later
-// */
-// func (a *application) shortLinkCreate(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
+	HTML response code and/or error message
+*/
+func DeleteQuote(a *app.Application) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 
-// 	// Validate link in payload
-// 	userLink := r.FormValue("link")
-// 	if 0 == len(userLink) {
-// 		a.sendJsonErrorMessage(w, http.StatusBadRequest, "Payload form does not contain definition for 'link' value")
-// 		return
-// 	}
+		// First ensure the link ID exists in path; otherwise it's a 400 Bad Request
+		id, err := tryParseId(r.PathValue("id"))
+		if nil != err {
+			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Invalid or out of range ID", err)
+			return
+		}
 
-// 	// Since this is intended to store hyperlinks, let's ensure we have one:
-// 	if "http://" != userLink[:7] && "https://" != userLink[:8] {
-// 		a.sendJsonErrorMessage(w, http.StatusBadRequest, "Provided link does not look like a valid URL")
-// 		return
-// 	}
-
-// 	// Generate short slug. Passing a GUID in here instead of the link would make this a lot more random.
-// 	slug := a.generateSlug(userLink)
-
-// 	// Add to database
-// 	if err := a.InsertLink(slug, userLink); err != nil {
-// 		a.sendJsonErrorMessage(w, http.StatusConflict, err.Error())
-// 		return
-// 	}
-
-// 	// return slug to caller
-// 	w.WriteHeader(http.StatusCreated)
-// 	json.NewEncoder(w).Encode(createResponse{ Slug: slug })
-// }
-
-// /*
-// 	Retrieves a stored hyperlink using the slug provided in the URL
-
-// 	# Parameters (URL)
-
-// 	- id (string) = a slug to retrieve
-
-// 	# Returns
-	
-// 	string = the URL that is stored for this slug
-// */
-// func (a *application) shortLinkGet(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-
-// 	// First ensure the link ID exists in path; otherwise it's a 400 Bad Request
-// 	linkId := r.PathValue("id")
-// 	if "" == linkId {
-// 		a.sendJsonErrorMessage(w, http.StatusBadRequest, "ID not provided in URL")
-// 		return
-// 	}
-
-// 	// Check the database for this ID
-// 	if link, err := a.GetLink(linkId); err == nil {
-// 		json.NewEncoder(w).Encode(retrieveResponse{ Link: link })
-// 	} else {
-// 		a.sendJsonErrorMessage(w, http.StatusNotFound, err.Error())
-// 	}
-// }
-
-// /*
-// 	Deletes a stored hyperlink using the slug provided in the URL
-
-// 	# Parameters (URL)
-
-// 	- id (string) = a slug to retrieve
-// */
-// func (a *application) shortLinkDelete(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-
-// 	// First ensure the link ID exists in path; otherwise it's a 400 Bad Request
-// 	linkId := r.PathValue("id")
-// 	if "" == linkId {
-// 		a.sendJsonErrorMessage(w, http.StatusBadRequest, "ID not provided in URL")
-// 		return
-// 	}
-
-// 	// Try to delete link
-// 	if err := a.RemoveLink(linkId); err == nil {
-// 		w.WriteHeader(http.StatusNoContent)
-// 	} else {
-// 		a.sendJsonErrorMessage(w, http.StatusNotFound, err.Error())
-// 	}
-// }
+		if err := a.Database.DeleteQuote(id); err == nil {
+			w.WriteHeader(http.StatusNoContent)
+		} else {
+			sendJsonErrorMessage(a, w, http.StatusNotFound, err.Error(), err)
+		}
+	}
+}
