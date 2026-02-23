@@ -55,8 +55,7 @@ func (s *SQLiteStorage) CloseConnection() error {
 	Creates table(s) compatible with the SQLite3 driver
 
 	# Parameters
-	
-	- db (*sql.DB) pointer to the database file
+		- db (*sql.DB) pointer to the database file
 */
 func createSqliteTables(db *sql.DB) error {
 	query := `
@@ -76,8 +75,7 @@ func createSqliteTables(db *sql.DB) error {
 	Retrieves a Quote from the database
 
 	# Parameters
-	
-	- id int64 = the unique identifier of the quote
+		- id (int64) = the unique identifier of the quote
 */
 func (s *SQLiteStorage) GetQuote(id int64) (*models.Quote, error) {
 	s.logger.Info("GetQuote start", slog.Int64("id", id))
@@ -137,14 +135,11 @@ func (s *SQLiteStorage) GetRandomQuote() (*models.Quote, error) {
 	Saves a new or existing Quote to the database
 
 	# Parameters
-	
-	- data *models.Quote = The quote object to save. Set Id property to 0 or less to make a new record.
+		- data (*models.Quote) = The quote object to save. Set Id property to 0 or less to make a new record.
 
 	# Returns
-	
-	- quoteId int64 = if you created a new record, this will be its unique identifier
-	
-	- err error = if something went wrong, this will have details
+		- quoteId (int64) = if you created a new record, this will be its unique identifier
+		- err (error) = if something went wrong, this will have details
 */
 func (s *SQLiteStorage) SaveQuote(data *models.Quote) (quoteId int64, err error) {
 	isNewRecord := data.Id <= 0
@@ -180,12 +175,10 @@ func (s *SQLiteStorage) SaveQuote(data *models.Quote) (quoteId int64, err error)
 	Deletes a Quote from the database
 
 	# Parameters
-	
-	- id int64 = the unique identifier of the quote
+		- id (int64) = the unique identifier of the quote
 
 	# Returns
-
-	- err error = if something went wrong, this will have details
+		- err (error) = if something went wrong, this will have details
 */
 func (s *SQLiteStorage) DeleteQuote(id int64) error {
 	s.logger.Info("DeleteQuote start", slog.Int64("id", id))

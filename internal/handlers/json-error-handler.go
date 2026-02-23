@@ -16,14 +16,10 @@ type ErrorResponse struct {
 	Writes a JSON error message to the output stream, along with HTTP status code
 	
 	# Parameters
-	
-	- w (http.ResponseWriter) = reference to the current response writer
-
-	- statusCode (int) = status code to write (ie 400, 500)
-
-	- message (string) = what to write to the output (ie "Bad request", "Malformed input", etc)
-
-	- innerError (error) = if there's an internal error, this might provide more details
+		- w (http.ResponseWriter) = reference to the current response writer
+		- statusCode (int) = status code to write (ie 400, 500)
+		- message (string) = what to write to the output (ie "Bad request", "Malformed input", etc)
+		- innerError (error) = if there's an internal error, this might provide more details
 */
 func sendJsonErrorMessage(a *app.Application, w http.ResponseWriter, statusCode int, message string, innerError error) {
 	a.Logger.Info("sendJsonErrorMessage", slog.Int("statusCode", statusCode), slog.String("message", message), slog.Any("error", innerError))

@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"github.com/jamie-belanger/personal-quotes/internal/enums"
 	"github.com/jamie-belanger/personal-quotes/internal/storage"
+
+	"github.com/microcosm-cc/bluemonday"
 )
 
 /*
@@ -12,16 +14,19 @@ application stores things the application needs in a struct that's
 easy to inject into any dependency method
 */
 type Application struct {
-	Logger     *slog.Logger
+	Logger          *slog.Logger
 
 	// Port the application is listening on
-	Port       *int
+	Port            *int
 
 	// Type of database driver in use
-	Dbtype     enums.DbType
+	Dbtype          enums.DbType
 
 	// Interface to the database storage driver
-	Database   storage.Storage
+	Database        storage.Storage
+
+	// HTML sanitization policy
+	Sanitizer       *bluemonday.Policy
 }
 
 
@@ -59,4 +64,19 @@ func (a *Application) DisconnectDatabase() error {
 	}
 
 	return nil
+}
+
+/*
+	Builds and initializes the default HTML sanitizer policy for the application.
+	This policy currently supports the following HTML tags:
+	
+		* Bold = <b> or <strong>
+		* Italic = <i> or <em>
+		* Underline = <u>
+		* Line Break = <br>
+		* Lists = <ul>, <ol>, and <li>
+*/
+func (a *Application) BuildSanitizerPolicy() {
+	a.Sanitizer = bluemonday.NewPolicy()
+	a.Sanitizer.AllowElements("i", "b", "br", "strong", "em", "u", "ul", "ol", "li")
 }
