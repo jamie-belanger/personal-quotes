@@ -7,9 +7,9 @@ An application that allows the user to maintain and use a personal library of qu
 <details>
 <summary>Phase 1 Tasks = In Progress</summary>
 
-- ♻️ **Basic Structure**
-  - ✅ Um, everything I did before making this (whew!)
-  - 🔲 HTML sanitizing
+- ✅ **Basic Structure**
+  - ✅ Um, everything I did before making this roadmap (whew!)
+  - ✅ HTML sanitizing
 - ♻️ **Database schema design**
   - ✅ Quote = for storing quotes
   - 🔲 Tag = for storing tags, as metadata for quotes (ie "funny" or "motivational")
@@ -20,8 +20,8 @@ An application that allows the user to maintain and use a personal library of qu
   - 🔲 Controllers for Tags
   - 🔲 Quotes search endpoint &mdash; GET all, author search, body search, paging logic, filter by tag, etc
   - 🔲 Swagger for documentation?
-  - 🔲 Test API with curl
-- ♻️ **SQLite database driver**
+  - ✅ Test API with curl
+- ✅ **SQLite database driver**
 
 </details>
 

@@ -22,6 +22,8 @@ func main() {
 	parseCommandLineParameters(a)
 
 	a.Logger.Info("Application starting", slog.Int("port", *a.Port))
+	a.BuildSanitizerPolicy()
+
 	if err := a.ConnectDatabase(); err != nil {
 		a.Logger.Error(err.Error())
 		os.Exit(1)
@@ -63,3 +65,4 @@ func parseCommandLineParameters(app *app.Application) {
 		os.Exit(1)
 	}
 }
+

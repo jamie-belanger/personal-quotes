@@ -17,8 +17,7 @@ type QuoteCreateResponse struct {
 	Retrieves a random quote from the database
 
 	# Returns
-	
-	QuoteRetrieveResponse
+		- QuoteRetrieveResponse
 */
 func GetRandomQuote(a *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -37,12 +36,10 @@ func GetRandomQuote(a *app.Application) http.HandlerFunc {
 	Retrieves a stored quote using the id provided in the URL
 
 	# Parameters (URL)
-
-	- id (string) = a quote to retrieve
+		- id (string) = a quote to retrieve
 
 	# Returns
-	
-	QuoteRetrieveResponse
+		- QuoteRetrieveResponse
 */
 func GetQuote(a *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -69,31 +66,19 @@ func GetQuote(a *app.Application) http.HandlerFunc {
 	Saves the given data to the database
 
 	# Parameters (FORM)
-
-	- body (string) = text to save for quote body
-
-	- author (string) = text to save for quote author
+		- body (string) = text to save for quote body
+		- author (string) = text to save for quote author
 
 	# Returns
-	
-	QuoteCreateResponse = the newly saved quote Id
+		- QuoteCreateResponse = the newly saved quote Id
 */
 func CreateQuote(a *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		// Load data
-		body, err := sanitizeHTML(r.FormValue("body"))
-		if nil != err {
-			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Error parsing body text", err)
-			return
-		}
-
-		author, err := sanitizeHTML(r.FormValue("author"))
-		if nil != err {
-			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Error parsing author text", err)
-			return
-		}
+		body := a.Sanitizer.Sanitize(r.FormValue("body"))
+		author := a.Sanitizer.Sanitize(r.FormValue("author"))
 
 		quote := &models.Quote{
 			Id: 0,
@@ -115,18 +100,14 @@ func CreateQuote(a *app.Application) http.HandlerFunc {
 	Saves the given data to the database
 
 	# Parameters (URL)
-
-	- id (string) = a quote to retrieve
+		- id (string) = a quote to retrieve
 
 	# Parameters (FORM)
-
-	- body (string) = text to save for quote body
-
-	- author (string) = text to save for quote author
+		- body (string) = text to save for quote body
+		- author (string) = text to save for quote author
 
 	# Returns
-	
-	HTML response code and/or error message
+		- HTML response code and/or error message
 */
 func UpdateQuote(a *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -140,17 +121,8 @@ func UpdateQuote(a *app.Application) http.HandlerFunc {
 		}
 
 		// Load data
-		body, err := sanitizeHTML(r.FormValue("body"))
-		if nil != err {
-			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Error parsing body text", err)
-			return
-		}
-
-		author, err := sanitizeHTML(r.FormValue("author"))
-		if nil != err {
-			sendJsonErrorMessage(a, w, http.StatusBadRequest, "Error parsing author text", err)
-			return
-		}
+		body := a.Sanitizer.Sanitize(r.FormValue("body"))
+		author := a.Sanitizer.Sanitize(r.FormValue("author"))
 
 		quote := &models.Quote{
 			Id: id,
@@ -171,12 +143,10 @@ func UpdateQuote(a *app.Application) http.HandlerFunc {
 	Deletes the given quote from the database
 
 	# Parameters (URL)
-
-	- id (string) = a quote to retrieve
+		- id (string) = a quote to retrieve
 
 	# Returns
-	
-	HTML response code and/or error message
+		- HTML response code and/or error message
 */
 func DeleteQuote(a *app.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
