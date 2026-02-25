@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"log/slog"
-	"github.com/jamie-belanger/personal-quotes/internal/enums"
 	"github.com/jamie-belanger/personal-quotes/internal/storage"
 
 	"github.com/microcosm-cc/bluemonday"
@@ -20,7 +19,7 @@ type Application struct {
 	Port            *int
 
 	// Type of database driver in use
-	Dbtype          enums.DbType
+	Dbtype          storage.DbType
 
 	// Interface to the database storage driver
 	Database        storage.Storage
@@ -38,7 +37,7 @@ func (a *Application) ConnectDatabase() error {
 	defer a.Logger.Info("Database Connect complete")
 
 	switch a.Dbtype {
-		case enums.DatabaseSqlite:
+		case storage.DatabaseSqlite:
 			db, err := storage.NewSQLiteStorage(a.Logger, "./data/quotes.db")
 			if err != nil {
 				return err

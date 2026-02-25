@@ -1,4 +1,4 @@
-package enums
+package storage
 
 // Enumerated value of the database types
 type DbType int

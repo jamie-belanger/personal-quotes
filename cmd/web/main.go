@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/jamie-belanger/personal-quotes/internal/app"
-	"github.com/jamie-belanger/personal-quotes/internal/enums"
+	"github.com/jamie-belanger/personal-quotes/internal/storage"
 )
 
 
@@ -58,7 +58,7 @@ func parseCommandLineParameters(app *app.Application) {
 
 	switch *database {
 	case "sqlite":
-		app.Dbtype = enums.DatabaseSqlite
+		app.Dbtype = storage.DatabaseSqlite
 	default:
 		fmt.Printf("ERROR: Database value not recognized: %v\n", *database)
 		fmt.Println("--> supported drivers: 'sqlite' (default)")
