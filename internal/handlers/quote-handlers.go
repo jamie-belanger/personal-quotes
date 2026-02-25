@@ -85,6 +85,10 @@ func CreateQuote(a *app.Application) http.HandlerFunc {
 			Body: body,
 			Author: author,
 		}
+		if err := quote.Validate(); err != nil {
+			sendJsonErrorMessage(a, w, http.StatusBadRequest, err.Error(), err)
+			return
+		}
 
 		if quoteId, err := a.Database.SaveQuote(quote); err == nil {
 			json.NewEncoder(w).Encode(QuoteCreateResponse{ Id: quoteId })
@@ -128,6 +132,10 @@ func UpdateQuote(a *app.Application) http.HandlerFunc {
 			Id: id,
 			Body: body,
 			Author: author,
+		}
+		if err := quote.Validate(); err != nil {
+			sendJsonErrorMessage(a, w, http.StatusBadRequest, err.Error(), err)
+			return
 		}
 
 		if _, err := a.Database.SaveQuote(quote); err == nil {

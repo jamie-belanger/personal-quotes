@@ -15,5 +15,8 @@ func tryParseId(pathValue string) (id int64, err error) {
 	}
 
 	id, err = strconv.ParseInt(pathValue, 10, 64)
+	if id < 0 {
+		err = errors.New("Identifiers cannot be negative")
+	}
 	return
 }

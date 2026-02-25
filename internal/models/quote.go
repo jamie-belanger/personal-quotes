@@ -27,12 +27,12 @@ type Quote struct {
 /*
 	Validates the given Quote struct to ensure that required data is defined
 */
-func (q *Quote) Validate() (bool, error) {
+func (q *Quote) Validate() error {
 	if 0 == len(q.Body) {
-		return false, errors.New("Quotes require body text")
+		return errors.New("Quotes require body text")
 	}
 	if 0 == len(q.Author) {
-		return false, errors.New("Quotes require author text")
+		return errors.New("Quotes require author text")
 	}
-	return true, nil
+	return nil
 }
